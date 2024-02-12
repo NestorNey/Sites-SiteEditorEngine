@@ -7,28 +7,47 @@ import React, { useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 export default function Editor() {
-    const state = EditorData; 
+    const state = EditorData;
 
     const handleDragEnd = (result) => {
-        if (!result.destination) return
+        const { source, destination } = result;
 
-        const { source, destination } = result
-        const sourceColumnId = source.droppableId
-        const destinationColumnId = destination.droppableId
+        if (!result.destination) return;
+        if (source.droppableId === destination.droppableId) return;
 
-        // Asegúrate de que state esté definido y contenga ambas columnas
-        const sourceItems = { ...state[sourceColumnId]?.items } || []
-        const destinationItems = { ...state[destinationColumnId]?.items } || []
+        const sourceColumnId = source.droppableId;
+        const destinationColumnId = destination.droppableId;
 
-        const reorderedItem = { ...sourceItems[source.index] } // Clona el elemento
-        destinationItems.splice(destination.index, 0, reorderedItem)
+        const sourceItems = { ...state[sourceColumnId].items };
+        const destinationItems = { ...state[destinationColumnId].items };
 
-        state[sourceColumnId] = sourceItems
-        state[destinationColumnId] = destinationItems
+        const reorderedItem = JSON.parse(JSON.stringify(sourceItems[source.index]));
+        destinationItems[destination.index] = reorderedItem;
+
+        for(const i in destinationItems) {
+            let item = destinationItems[i];
+            item.id = destinationColumnId + "_" + item.id;
+
+            destinationItems[i] = item;
+        }
+
+        state[sourceColumnId].items = sourceItems;
+        state[destinationColumnId].items = destinationItems;
     };
 
+    const handleDragStart = result => {
+        const { source } = result;
+        const itemIndex = source.index;
+        const sourceColumnId = source.droppableId;
+
+        state[sourceColumnId].items[itemIndex] = {
+            id: "removable",
+            content: ""
+        }
+    }
+
     return (
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
             <ElementsColumn/>
             <PageColumn/>
         </DragDropContext>

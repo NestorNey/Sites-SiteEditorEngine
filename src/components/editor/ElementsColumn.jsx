@@ -12,7 +12,7 @@ export default function ElementsColumn() {
     const column_data = EditorData.column_0
 
     return(
-        <Droppable droppableId={column_data.id}>
+        <Droppable droppableId={column_data.id} isDropDisabled={true}>
             {(provided) => (
                 <Column ref={provided.innerRef} {...provided.droppableProps}>
                     {Object.values(column_data.items).map((item, index) => {
