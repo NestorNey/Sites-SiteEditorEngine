@@ -1,25 +1,77 @@
-const EditorData = {
-    column_0: {
-        id: "column_0",
+import { HeaderInput } from "@/components/editor/Components/inputs/HeaderInput"
+import { CarouselInput } from "@/components/editor/Components/inputs/CarouselInput"
+import { ProductInput } from "@/components/editor/Components/inputs/ProductInput"
+import { Default } from "@/components/editor/Components/statics/Default";
+
+const metadata = {
+    components: [
+        {
+            id: "comp_header",
+            unique: true,
+            comp_type: "Header",
+            style: "Default",
+            inputs: {
+                inputs_number: 3,
+                InputComponent: Default.Input.Header
+            },
+            StaticComponent: Default.Static.Header
+        },
+        {
+            id: "comp_carousel",
+            unique: false,
+            comp_type: "Carousel",
+            style: "Default",
+            inputs: {
+                inputs_number: 3,
+                InputComponent: Default.Input.Carousel
+            },
+            StaticComponent: Default.Static.Carousel
+        },
+        {
+            id: "comp_product",
+            unique: false,
+            comp_type: "Product",
+            style: "Default",
+            inputs: {
+                inputs_number: 3,
+                InputComponent: Default.Input.Product
+            },
+            StaticComponent: Default.Static.Product
+        }
+    ],
+    components_column: {
+        id: "components_column",
         items: [
             {
-                id: "item_0",
-                content: "Header"
+                id: "comp_header",
+                unique: true,
+                comp_id: "Header",
+                style: "dafult",
+                n_inputs: 3,
+                component: HeaderInput
             },
             {
-                id: "item_2",
-                content: "Carousel"
+                id: "comp_carousel",
+                unique: false,
+                comp_id: "Carousel",
+                style: "default",
+                n_inputs: 3,
+                component: CarouselInput
             },
             {
-                id: "item_3",
-                content: "Product"
+                id: "comp_product",
+                unique: false,
+                comp_id: "Product",
+                style: "default",
+                n_inputs: 3,
+                component: ProductInput
             }
         ]
     },
-    column_1: {
-        id: "column_1",
+    page_column: {
+        id: "page_column",
         items: []
     }
-}
+};
 
-export default EditorData
+export default metadata;

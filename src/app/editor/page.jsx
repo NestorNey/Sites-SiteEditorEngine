@@ -1,10 +1,15 @@
 'use client'
 
 import EditorData from '@/components/editor/EditorData';
-import ElementsColumn from '@/components/editor/ElementsColumn';
-import PageColumn from '@/components/editor/PageColumn';
+import ComponentsColumn from '@/components/editor/columns/ComponentsColumn';
+import PageColumn from '@/components/editor/columns/PageColumn';
 import React, { useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import styled from 'styled-components';
+
+const EditorContainer = styled.div`
+    display: flex;
+`;
 
 export default function Editor() {
     const state = EditorData;
@@ -13,43 +18,67 @@ export default function Editor() {
         const { source, destination } = result;
 
         if (!result.destination) return;
-        if (source.droppableId === destination.droppableId) return;
 
-        const sourceColumnId = source.droppableId;
-        const destinationColumnId = destination.droppableId;
+        const sourceItems = state[source.droppableId].items;
+        const destinationItems = state[destination.droppableId].items;
+        let reorderedItem;
 
-        const sourceItems = { ...state[sourceColumnId].items };
-        const destinationItems = { ...state[destinationColumnId].items };
+        if (source.droppableId === destination.droppableId && destination.droppableId === "page_column") {
+            reorderedItem = sourceItems.splice(source.index, 1)[0];
+        } else {
+            reorderedItem = JSON.parse(JSON.stringify(sourceItems[source.index]));
+            reorderedItem.component = sourceItems[source.index].component;
+            reorderedItem.id = destination.droppableId + "_" + reorderedItem.id;
 
-        const reorderedItem = JSON.parse(JSON.stringify(sourceItems[source.index]));
-        destinationItems[destination.index] = reorderedItem;
+            for (const i in destinationItems) {
+                if (destinationItems[i].id === reorderedItem.id) {
+                    if (sourceItems[source.index].unique) return;
+                    
+                    if (sourceItems[source.index].count !== undefined) {
+                        reorderedItem.id = reorderedItem.id + "_" + sourceItems[source.index].count;
+                        sourceItems[source.index].count = sourceItems[source.index].count + 1;
+                    } else {
+                        reorderedItem.id = reorderedItem.id + "_" + 0;
+                        sourceItems[source.index].count = 1;
+                    }
+                }
+            }
+        };
 
-        for(const i in destinationItems) {
-            let item = destinationItems[i];
-            item.id = destinationColumnId + "_" + item.id;
-
-            destinationItems[i] = item;
-        }
-
-        state[sourceColumnId].items = sourceItems;
-        state[destinationColumnId].items = destinationItems;
+        destinationItems.splice(destination.index, 0, reorderedItem);
     };
 
-    const handleDragStart = result => {
-        const { source } = result;
-        const itemIndex = source.index;
-        const sourceColumnId = source.droppableId;
+    const handleSaveTemplate = event => {
+        const template = {};
+        const page_items = state.page_column.items;
 
-        state[sourceColumnId].items[itemIndex] = {
-            id: "removable",
-            content: ""
+        console.log("xD");
+        
+        for (const item in page_items) {
+            const component_id = "component_" + item;
+            template[component_id] = {
+                comp_id: page_items[item].comp_id,
+                style: page_items[item].style,
+                values: {}
+            }
+            for (let i = 1; i <= page_items[item].n_inputs; i++) {
+                const inputName = page_items[item].id + "_input_" + i;
+                template[component_id].values[component_id + "_value_" + i] = document.getElementById(inputName).value;
+            }
         }
+
+            console.log(JSON.stringify(template))
     }
 
     return (
-        <DragDropContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-            <ElementsColumn/>
-            <PageColumn/>
-        </DragDropContext>
+        <div>
+            <EditorContainer>
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <ComponentsColumn key="components_column"/>
+                    <PageColumn key="page_column"/>
+                </DragDropContext>
+            </EditorContainer>
+            <button onClick={handleSaveTemplate}>Guardar plantilla</button>
+        </div>
     );
 };
