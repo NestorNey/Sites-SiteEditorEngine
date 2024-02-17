@@ -1,6 +1,6 @@
 'use client'
 
-import EditorData from '@/components/editor/EditorData';
+import { metadata } from '@/components/editor/Components/metadata';
 import ComponentsColumn from '@/components/editor/columns/ComponentsColumn';
 import PageColumn from '@/components/editor/columns/PageColumn';
 import React, { useState } from 'react';
@@ -12,26 +12,28 @@ const EditorContainer = styled.div`
 `;
 
 export default function Editor() {
-    const state = EditorData;
+    const style = "style_1";
+    const state = metadata;
 
     const handleDragEnd = (result) => {
         const { source, destination } = result;
 
         if (!result.destination) return;
 
-        const sourceItems = state[source.droppableId].items;
-        const destinationItems = state[destination.droppableId].items;
+        const sourceItems = source.droppableId === "page" ? state.page.items : state.components[style][source.droppableId];
+        const destinationItems = destination.droppableId === "page" ? state.page.items : state.components[style][destination.droppableId];
         let reorderedItem;
 
-        if (source.droppableId === destination.droppableId && destination.droppableId === "page_column") {
+        if (source.droppableId === destination.droppableId && destination.droppableId === "page") {
             reorderedItem = sourceItems.splice(source.index, 1)[0];
         } else {
             reorderedItem = JSON.parse(JSON.stringify(sourceItems[source.index]));
-            reorderedItem.component = sourceItems[source.index].component;
+            reorderedItem.input.InputComponent = sourceItems[source.index].input.InputComponent;
+
             reorderedItem.id = destination.droppableId + "_" + reorderedItem.id;
 
             for (const i in destinationItems) {
-                if (destinationItems[i].id === reorderedItem.id) {
+                if (destinationItems[i].comp_type === reorderedItem.comp_type) {
                     if (sourceItems[source.index].unique) return;
                     
                     if (sourceItems[source.index].count !== undefined) {
@@ -49,21 +51,23 @@ export default function Editor() {
     };
 
     const handleSaveTemplate = event => {
-        const template = {};
-        const page_items = state.page_column.items;
+        const template = {
+            style: style,
+            components: {}
+        };
+        const page_items = state.page.items;
 
-        console.log("xD");
-        
         for (const item in page_items) {
             const component_id = "component_" + item;
-            template[component_id] = {
-                comp_id: page_items[item].comp_id,
-                style: page_items[item].style,
+            template.components[component_id] = {
+                id: page_items[item].id,
+                comp_type: page_items[item].comp_type,
+                style_number: page_items[item].style_number,
                 values: {}
             }
-            for (let i = 1; i <= page_items[item].n_inputs; i++) {
+            for (let i = 1; i <= page_items[item].input.inputs_number; i++) {
                 const inputName = page_items[item].id + "_input_" + i;
-                template[component_id].values[component_id + "_value_" + i] = document.getElementById(inputName).value;
+                template.components[component_id].values[component_id + "_value_" + i] = document.getElementById(inputName).value;
             }
         }
 
@@ -74,7 +78,7 @@ export default function Editor() {
         <div>
             <EditorContainer>
                 <DragDropContext onDragEnd={handleDragEnd}>
-                    <ComponentsColumn key="components_column"/>
+                    <ComponentsColumn key="components_column" style={"style_1"}/>
                     <PageColumn key="page_column"/>
                 </DragDropContext>
             </EditorContainer>

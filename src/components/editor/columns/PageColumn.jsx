@@ -1,23 +1,24 @@
 import { Droppable } from "react-beautiful-dnd"
 import styled from "styled-components"
-import metadata from "@/components/editor/EditorData";
+import { metadata } from "../Components/metadata";
 
 const Column = styled.div`
     border: 1px solid black;
     width: 100%;
     height: 100vh;
+    overflow-y: scroll;
 `;
 
 export default function PageColumn() {
-    const column_data = metadata.page_column;
+    const column = metadata.page;
 
     return(
-        <Droppable droppableId={column_data.id}>
+        <Droppable droppableId={"page"}>
             {(provided) => (
                 <Column ref={provided.innerRef} {...provided.droppableProps}>
-                    {Object.values(column_data.items).map((item, index) => {
+                    {Object.values(column.items).map((item, index) => {
                         return( 
-                            <item.component key={item.id} item={item} index={index}/>
+                            <item.input.InputComponent key={item.id} item={item} index={index}/>
                         )
                     })}
                     {provided.placeholder}
