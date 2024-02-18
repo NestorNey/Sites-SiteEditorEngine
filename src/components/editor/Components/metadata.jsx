@@ -12,7 +12,8 @@ export const metadata = {
                     style_number: 1,
                     input: {
                         inputs_number: 3,
-                        InputComponent: Default.inputs.Headers.template_1
+                        ExampleDynamicImport: require("./default/Default").Default.inputs.Headers.template_1,
+                        InputComponent:  require("./default/Default").Default.inputs.Headers.template_1
                     },
                     StaticComponent: Default.statics.Headers.template_1
                 },

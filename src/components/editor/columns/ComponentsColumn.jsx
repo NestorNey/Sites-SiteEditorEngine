@@ -25,7 +25,7 @@ export default function ElementsColumn( {style} ) {
                 return (
                     <Droppable droppableId={comp_type} isDropDisabled={true}>
                         {(provided) => (
-                            <StyleColumn ref={provided.innerRef} {...provided.droppableProps}>
+                            <StyleColumn key={comp_type} ref={provided.innerRef} {...provided.droppableProps}>
                                 <h2>{comp_type}</h2>
                                 {Object.values(components[comp_type]).map((item, index) => {
                                     let comp = "nulo";

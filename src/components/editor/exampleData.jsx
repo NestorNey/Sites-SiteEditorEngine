@@ -1,3 +1,5 @@
+
+// Ejemplo del dic JSON que generaria el guardar la plantilla
 const example_data = {
     "style":"style_1",
     "components":{
