@@ -1,14 +1,23 @@
-const importTemplate = (category, style, index) => ({
-    input: require(`./${style}/inputs/${category}/template_${index + 1}`),
-    static: require(`./${style}/statics/${category}/template_${index + 1}`)
-});
+// -------------------------------------- Metadata Info -----------------------------------------//
+
+
 
 const raw_metadata = {
     default: {
-        Headers: Array.from({ length: 4 }, (_, i) => importTemplate('Headers', 'default', i)),
-        Introductions: Array.from({ length: 4 }, (_, i) => importTemplate('Introductions', 'default', i))
-    },
-};
+        Headers: { length: 5 },
+        Introductions: { length: 4 }
+    }
+}
+
+
+
+// ----------------------------------- METADATA GENERATION ------------------------------------ //
+
+
+const importTemplate = (comp_name, style, index) => ({
+    input: require(`./${style}/inputs/${comp_name}/template_${index + 1}`),
+    static: require(`./${style}/statics/${comp_name}/template_${index + 1}`)
+});
 
 const metadata = {
     components: {},
@@ -19,6 +28,14 @@ const metadata = {
 };
 
 let component_count = 0;
+
+Object.keys(raw_metadata).map(style => {
+    Object.keys(raw_metadata[style]).map(comp => {
+        const comps_number = raw_metadata[style][comp].length;
+        
+        raw_metadata[style][comp] = Array.from({ length: comps_number }, (_, i) => importTemplate(comp, style, i))
+    })
+});
 
 // Iterar sobre los estilos y tipos de componentes
 for (const style in raw_metadata) {

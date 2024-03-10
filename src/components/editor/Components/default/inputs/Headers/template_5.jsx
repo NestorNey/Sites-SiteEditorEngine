@@ -7,6 +7,8 @@ export const props = {
 }
 
 export const InputTemplate = ({ item, index}) => {
+    const prefix = item.id;
+
     return (
         <Draggable draggableId={item.id} index={index}>
             {provided => (
@@ -16,10 +18,11 @@ export const InputTemplate = ({ item, index}) => {
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
                 >
-                    <h4>Header_1</h4>
-                    <input id={item.id + "_input_1"} type="text" placeholder="Input 1 de header"/>
-                    <input id={item.id + "_input_2"} type="text" placeholder="Input 2 de header"/>
-                    <input id={item.id + "_input_3"} type="text" placeholder="Input 3 de header"/>
+                    <h4>Header_5</h4>
+                    <input id={`${prefix}_input_1`} type="text" placeholder="Input 1 de header"/>
+                    <input id={`${prefix}_input_1`} type="text" placeholder="Input 2 de header"/>
+                    <input id={`${prefix}_input_1`} type="text" placeholder="Input 3 de header"/>
+                    <input id={`${prefix}_input_1`} type="text" placeholder="Input 4 de header"/>
 
                 </div>
             )}
