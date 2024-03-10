@@ -1,6 +1,5 @@
 import { Droppable } from "react-beautiful-dnd"
 import styled from "styled-components"
-import { metadata } from "../Components/metadata";
 
 const Column = styled.div`
     border: 1px solid black;
@@ -9,7 +8,7 @@ const Column = styled.div`
     overflow-y: scroll;
 `;
 
-export default function PageColumn() {
+export default function PageColumn({ metadata }) {
     const column = metadata.page;
 
     return(

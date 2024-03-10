@@ -1,7 +1,12 @@
 import { Draggable } from "react-beautiful-dnd";
 import "@/static/css/editor/ComponentsGlobal.css"
 
-export const input_introduction_template_2 = ({ item, index}) => {
+export const props = {
+    unique: false,
+    inputs_number: 3
+}
+
+export const InputTemplate = ({ item, index}) => {
     return (
         <Draggable draggableId={item.id} index={index}>
             {provided => (

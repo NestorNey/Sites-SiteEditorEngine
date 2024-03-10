@@ -1,7 +1,5 @@
 import { Droppable } from "react-beautiful-dnd"
 import styled from "styled-components"
-import { metadata } from "../Components/metadata";
-// import metadata from "@/components/editor/EditorData";
 
 const ComponentsSide = styled.div`
     border: 1px solid black;
@@ -16,25 +14,22 @@ const StyleColumn = styled.div`
     width: 350px;
 `;
 
-export default function ElementsColumn( {style} ) {
+export default function ElementsColumn( {style, metadata } ) {
     const components = metadata.components[style];
+    const component_error_msg = "Hubo un error al mostrar el componente";
 
     return(
         <ComponentsSide>
             {Object.keys(components).map((comp_type) => {
                 return (
-                    <Droppable droppableId={comp_type} isDropDisabled={true}>
+                    <Droppable key={comp_type} droppableId={comp_type} isDropDisabled={true}>
                         {(provided) => (
                             <StyleColumn key={comp_type} ref={provided.innerRef} {...provided.droppableProps}>
                                 <h2>{comp_type}</h2>
                                 {Object.values(components[comp_type]).map((item, index) => {
-                                    let comp = "nulo";
-                                    try {
-                                        comp = <item.input.InputComponent key={item.id} item={item} index={index}/>
-                                    } catch (error) {
-                                        console.log("ITEM: : : : : :: :\n" + item.input.InputComponent)
-                                    }
-                                    return comp
+                                    return item.input. InputComponent
+                                        ? <item.input.InputComponent key={item.id} item={item} index={index}/>
+                                        : component_error_msg;
                                 })}
                                 {provided.placeholder}
                             </StyleColumn>

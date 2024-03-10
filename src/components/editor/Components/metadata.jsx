@@ -1,102 +1,47 @@
-import { Default } from "./default/Default";
+const importTemplate = (category, style, index) => ({
+    input: require(`./${style}/inputs/${category}/template_${index + 1}`),
+    static: require(`./${style}/statics/${category}/template_${index + 1}`)
+});
 
-
-export const metadata = {
-    components: {
-        style_1: {
-            Headers: [
-                {
-                    id: "comp_0",
-                    unique: true,
-                    comp_type: "Headers",
-                    style_number: 1,
-                    input: {
-                        inputs_number: 3,
-                        ExampleDynamicImport: require("./default/Default").Default.inputs.Headers.template_1,
-                        InputComponent:  require("./default/Default").Default.inputs.Headers.template_1
-                    },
-                    StaticComponent: Default.statics.Headers.template_1
-                },
-                {
-                    id: "comp_1",
-                    unique: true,
-                    comp_type: "Headers",
-                    style_number: 2,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Headers.template_2
-                    },
-                    StaticComponent: Default.statics.Headers.template_2
-                },
-                {
-                    id: "comp_2",
-                    unique: true,
-                    comp_type: "Headers",
-                    style_number: 3,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Headers.template_3
-                    },
-                    StaticComponent: Default.statics.Headers.template_3
-                },
-                {
-                    id: "comp_3",
-                    unique: true,
-                    comp_type: "Headers",
-                    style_number: 4,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Headers.template_4
-                    },
-                    StaticComponent: Default.statics.Headers.template_4
-                }
-            ],
-            Introductions: [
-                {
-                    id: "comp_4",
-                    comp_type: "Introductions",
-                    style_number: 1,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Introductions.template_1
-                    },
-                    StaticComponent: Default.statics.Introductions.template_1
-                },
-                {
-                    id: "comp_5",
-                    comp_type: "Introductions",
-                    style_number: 2,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Introductions.template_2
-                    },
-                    StaticComponent: Default.statics.Introductions.template_2
-                },
-                {
-                    id: "comp_6",
-                    comp_type: "Introductions",
-                    style_number: 3,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Introductions.template_3
-                    },
-                    StaticComponent: Default.statics.Introductions.template_3
-                },
-                {
-                    id: "comp_7",
-                    comp_type: "Introductions",
-                    style_number: 4,
-                    input: {
-                        inputs_number: 3,
-                        InputComponent: Default.inputs.Introductions.template_4
-                    },
-                    StaticComponent: Default.statics.Introductions.template_4
-                }
-            ]
-        }
+const raw_metadata = {
+    default: {
+        Headers: Array.from({ length: 4 }, (_, i) => importTemplate('Headers', 'default', i)),
+        Introductions: Array.from({ length: 4 }, (_, i) => importTemplate('Introductions', 'default', i))
     },
+};
+
+const metadata = {
+    components: {},
     page: {
         id: "page_column",
         items: []
     }
+};
+
+let component_count = 0;
+
+// Iterar sobre los estilos y tipos de componentes
+for (const style in raw_metadata) {
+    metadata.components[style] = {};
+    for (const comp_type in raw_metadata[style]) {
+        metadata.components[style][comp_type] = [];
+        raw_metadata[style][comp_type].forEach((component, index) => {
+            const { props, InputTemplate } = component.input;
+            const StaticTemplate = component.static;
+
+            metadata.components[style][comp_type].push({
+                id: `comp_${component_count++}`,
+                unique: props.unique,
+                comp_type,
+                style_number: index + 1,
+                input: {
+                    inputs_number: props.inputs_number,
+                    InputComponent: InputTemplate
+                },
+                StaticComponent: StaticTemplate
+            });
+        });
+    }
 }
+
+export default metadata;
