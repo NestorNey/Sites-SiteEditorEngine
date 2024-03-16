@@ -37,28 +37,27 @@ Object.keys(raw_metadata).map(style => {
     })
 });
 
-// Iterar sobre los estilos y tipos de componentes
 for (const style in raw_metadata) {
     metadata.components[style] = {};
-    for (const comp_type in raw_metadata[style]) {
-        metadata.components[style][comp_type] = [];
-        raw_metadata[style][comp_type].forEach((component, index) => {
+    for (const compType in raw_metadata[style]) {
+        metadata.components[style][compType] = [];
+        Object.values(raw_metadata[style][compType]).map((component, index) => {
             const { props, InputTemplate } = component.input;
             const StaticTemplate = component.static;
 
-            metadata.components[style][comp_type].push({
+            metadata.components[style][compType].push({
                 id: `comp_${component_count++}`,
                 unique: props.unique,
-                comp_type,
-                style_number: index + 1,
-                input: {
-                    inputs_number: props.inputs_number,
-                    InputComponent: InputTemplate
-                },
+                count: 0,
+                compType: compType,
+                style_number: index,
+                InputComponent: InputTemplate,
                 StaticComponent: StaticTemplate
             });
-        });
+        })
     }
 }
+
+console.log(JSON.stringify(metadata));
 
 export default metadata;

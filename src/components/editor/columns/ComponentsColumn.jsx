@@ -27,8 +27,8 @@ export default function ElementsColumn( {style, metadata } ) {
                             <StyleColumn key={comp_type} ref={provided.innerRef} {...provided.droppableProps}>
                                 <h2>{comp_type}</h2>
                                 {Object.values(components[comp_type]).map((item, index) => {
-                                    return item.input. InputComponent
-                                        ? <item.input.InputComponent key={item.id} item={item} index={index}/>
+                                    return item.InputComponent
+                                        ? <item.InputComponent key={item.id} item={item} index={index}/>
                                         : component_error_msg;
                                 })}
                                 {provided.placeholder}

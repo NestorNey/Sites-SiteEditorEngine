@@ -15,11 +15,12 @@ export const InputTemplate = ({ item, index}) => {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     ref={provided.innerRef}
+                    id={item.id}
                 >
                     <h4>Introduction_2</h4>
-                    <input id={item.id + "_input_1"} type="text" placeholder="Input 1 de header"/>
-                    <input id={item.id + "_input_2"} type="text" placeholder="Input 2 de header"/>
-                    <input id={item.id + "_input_3"} type="text" placeholder="Input 3 de header"/>
+                    <input name="title" type="text" placeholder="Input 1 de header"/>
+                    <input name="desc" ype="text" placeholder="Input 2 de header"/>
+                    <input name="subtext" type="text" placeholder="Input 3 de header"/>
 
                 </div>
             )}

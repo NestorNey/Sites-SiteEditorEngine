@@ -1,7 +1,8 @@
 import { Droppable } from "react-beautiful-dnd"
 import styled from "styled-components"
+import { FormEvent } from 'react'
 
-const Column = styled.div`
+const Column = styled.form`
     border: 1px solid black;
     width: 100%;
     height: 100vh;
@@ -14,10 +15,12 @@ export default function PageColumn({ metadata }) {
     return(
         <Droppable droppableId={"page"}>
             {(provided) => (
-                <Column ref={provided.innerRef} {...provided.droppableProps}>
+                <Column 
+                    id="page_template" ref={provided.innerRef} {...provided.droppableProps}
+                >
                     {Object.values(column.items).map((item, index) => {
                         return( 
-                            <item.input.InputComponent key={item.id} item={item} index={index}/>
+                            <item.InputComponent key={item.id} item={item} index={index}/>
                         )
                     })}
                     {provided.placeholder}

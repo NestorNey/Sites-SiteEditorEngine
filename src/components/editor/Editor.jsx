@@ -5,77 +5,123 @@ import PageColumn from '@/components/editor/columns/PageColumn';
 import { DragDropContext } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import metadata from './Components/metadata';
-import { useSearchParams } from 'next/navigation';
+import { saveSite, saveSiteImages } from '@/utils/api';
+import { getDestinationIndex } from '@/utils/dnd/destination';
+import { getReorderedItem } from '@/utils/dnd/sorting';
+import { Sites } from '@/components/editor/metadatav2';
 
 const EditorContainer = styled.div`
     display: flex;
 `;
 
-export const Editor = () => {
-    const style = useSearchParams().get("style");
-    const state = metadata;
+export const Editor = ({ style }) => {
 
+    Sites.registryComponents();
+    console.log(Sites.components);
+
+    const Comp = Sites.components[0];
+
+    console.log(new Comp())
+
+    // TO-DO
+    const siteName = 'example_template';
     if(!Object.keys(metadata.components).includes(style)) return "Error";
 
     const handleDragEnd = (result) => {
-        const { source, destination } = result;
-
         if (!result.destination) return;
 
-        const sourceItems = source.droppableId === "page" ? state.page.items : state.components[style][source.droppableId];
-        const destinationItems = destination.droppableId === "page" ? state.page.items : state.components[style][destination.droppableId];
-        let destination_item = destinationItems[destination.index];
-        let reorderedItem;
-        
-        if (source.droppableId === destination.droppableId && destination.droppableId === "page") {
-            reorderedItem = sourceItems.splice(source.index, 1)[0];
-        } else {
-            reorderedItem = JSON.parse(JSON.stringify(sourceItems[source.index]));
-            reorderedItem.input.InputComponent = sourceItems[source.index].input.InputComponent;
+        const { source, destination } = result;
+        const pageItems = metadata.page.items;
+        const destinationItem = pageItems[destination.index];
 
-            reorderedItem.id = destination.droppableId + "_" + reorderedItem.id;
+        const reorderedItem = getReorderedItem(
+            source, 
+            destination, 
+            metadata, 
+            pageItems,
+            style
+        );
 
-            for (const i in destinationItems) {
-                if (destinationItems[i].comp_type === reorderedItem.comp_type) {
-                    if (sourceItems[source.index].unique) return;
-                    
-                    if (sourceItems[source.index].count !== undefined) {
-                        reorderedItem.id = reorderedItem.id + "_" + sourceItems[source.index].count;
-                        sourceItems[source.index].count = sourceItems[source.index].count + 1;
-                    } else {
-                        reorderedItem.id = reorderedItem.id + "_" + 0;
-                        sourceItems[source.index].count = 1;
-                    }
-                }
-            }
-        };
+        destination.index = getDestinationIndex(
+            destination.index,
+            reorderedItem, 
+            destinationItem, 
+            source, 
+            pageItems
+        );
 
-        if (reorderedItem.comp_type === "Headers") destination.index = 0;
-        else if (reorderedItem.comp_type === "Footer") destination.index = destinationItems.length - 1;
-        else if (destination_item != null && destination_item.comp_type === "Headers") destination.index = source.index;
-
-        destinationItems.splice(destination.index, 0, reorderedItem);
+        pageItems.splice(destination.index, 0, reorderedItem);
     };
 
-    const handleSaveTemplate = event => {
-        const template = {
-            style: style,
-            components: {}
-        };
-        const page_items = state.page.items;
+    const refactorSite = (site) => {
+        // Clone page to get non pointer data
+        const refactoredSite = JSON.parse(JSON.stringify(site));
 
-        for (const item in page_items) {
-            const component_id = "component_" + item;
-            template.components[component_id] = {
-                id: page_items[item].id,
-                comp_type: page_items[item].comp_type,
-                style_number: page_items[item].style_number,
-                values: {}
-            }
-            for (let i = 1; i <= page_items[item].input.inputs_number; i++) {
-                const inputName = page_items[item].id + "_input_" + i;
-                template.components[component_id].values[component_id + "_value_" + i] = document.getElementById(inputName).value;
-            }
+        refactoredSite.style = style;
+        refactoredSite.name = siteName;
+
+        delete refactoredSite.id;
+
+        return refactoredSite;
+    }
+
+    const refactorItem = (item) => {
+        // Delete unnecessary data for backend
+        delete item.StaticComponent
+        delete item.id;
+        delete item.input;
+        delete item.unique;
+        
+        // Add necessary data
+        item.values = {
+            texts: {},
+            images: {}
+        }
+
+        return item;
+    }
+
+    const handleSaveSite = event => {
+        // Refactor the site to get a clean copy
+        const site = refactorSite(metadata.page);
+        let siteImages = [];
+
+        // Traverse the list of items Site Components) to modify and save their values.(
+        site.items.forEach((item, index) => {
+            // Get the component values
+            let componentId = item.id;
+            let component = document.getElementById(componentId);
+            let componentInputs = component.getElementsByTagName('input');
+
+            // Refactor the item to get a clean copy
+            item = refactorItem(item);
+
+            Object.values(componentInputs).map(async (input) => {
+                // Add images data to an array that will be sent later
+                if (input.type === 'file') {
+                    const file = input.files[0];
+                    
+                    siteImages.push({
+                        compIndex: index,
+                        inputName: input.name,
+                        file: file
+                    });
+
+                    return;
+                };
+
+                item.values.texts[input.name] = input.value;
+            });
+        });
+
+        try {
+            console.log(site);
+            // saveSiteImages(siteImages, 16);
+            // uploadSite(site).then(siteId => {
+            //     uploadSiteImages(siteImages, siteId);
+            // });
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -85,9 +131,10 @@ export const Editor = () => {
                 <DragDropContext onDragEnd={handleDragEnd}>
                     <ComponentsColumn key="components_column" metadata={metadata} style={style}/>
                     <PageColumn key="page_column" metadata={metadata}/>
+                    <Comp ex='asd'/>
                 </DragDropContext>
             </EditorContainer>
-            <button onClick={handleSaveTemplate}>Guardar plantilla</button>
+            <button onClick={handleSaveSite}>Guardar plantilla</button>
         </div>
     );
 }
