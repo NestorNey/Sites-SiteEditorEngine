@@ -1,3 +1,9 @@
-export default function Page() {
-  return "THIS IS THE INDEX"
+"use client"
+
+export default function HomePage () {
+  return (
+    <>
+      Hello world
+    </>
+  )
 }

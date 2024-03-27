@@ -1,28 +1,22 @@
 'use client'
 
-import ComponentsColumn from '@/components/editor/columns/ComponentsColumn';
-import PageColumn from '@/components/editor/columns/PageColumn';
 import { DragDropContext } from 'react-beautiful-dnd';
 import styled from 'styled-components';
-import metadata from './Components/metadata';
-import { saveSite, saveSiteImages } from '@/utils/api';
-import { getDestinationIndex } from '@/utils/dnd/destination';
-import { getReorderedItem } from '@/utils/dnd/sorting';
-import { Sites } from '@/components/editor/metadatav2';
+
+import ComponentsColumn from '@/components/editor/columns/ComponentsColumn';
+import PageColumn from '@/components/editor/columns/PageColumn';
+import metadata from '@/components/editor/components/metadata';
+
+import { saveSite, saveSiteImages } from '@/libs/newApi';
+import { getDestinationIndex } from '@/libs/utils/dnd/destination';
+import { getReorderedItem } from '@/libs/utils/dnd/sorting';
+import { refactorItem, refactorSite } from '@/libs/utils/dnd/refactors';
 
 const EditorContainer = styled.div`
     display: flex;
 `;
 
 export const Editor = ({ style }) => {
-
-    Sites.registryComponents();
-    console.log(Sites.components);
-
-    const Comp = Sites.components[0];
-
-    console.log(new Comp())
-
     // TO-DO
     const siteName = 'example_template';
     if(!Object.keys(metadata.components).includes(style)) return "Error";
@@ -42,6 +36,8 @@ export const Editor = ({ style }) => {
             style
         );
 
+        if (reorderedItem === false) return;
+
         destination.index = getDestinationIndex(
             destination.index,
             reorderedItem, 
@@ -53,37 +49,9 @@ export const Editor = ({ style }) => {
         pageItems.splice(destination.index, 0, reorderedItem);
     };
 
-    const refactorSite = (site) => {
-        // Clone page to get non pointer data
-        const refactoredSite = JSON.parse(JSON.stringify(site));
-
-        refactoredSite.style = style;
-        refactoredSite.name = siteName;
-
-        delete refactoredSite.id;
-
-        return refactoredSite;
-    }
-
-    const refactorItem = (item) => {
-        // Delete unnecessary data for backend
-        delete item.StaticComponent
-        delete item.id;
-        delete item.input;
-        delete item.unique;
-        
-        // Add necessary data
-        item.values = {
-            texts: {},
-            images: {}
-        }
-
-        return item;
-    }
-
     const handleSaveSite = event => {
         // Refactor the site to get a clean copy
-        const site = refactorSite(metadata.page);
+        const site = refactorSite(metadata.page, siteName, style);
         let siteImages = [];
 
         // Traverse the list of items Site Components) to modify and save their values.(
@@ -115,11 +83,9 @@ export const Editor = ({ style }) => {
         });
 
         try {
-            console.log(site);
-            // saveSiteImages(siteImages, 16);
-            // uploadSite(site).then(siteId => {
-            //     uploadSiteImages(siteImages, siteId);
-            // });
+            saveSite(site).then(siteId => {
+                saveSiteImages(siteImages, siteId);
+            });
         } catch (error) {
             console.log(error);
         }
@@ -131,7 +97,6 @@ export const Editor = ({ style }) => {
                 <DragDropContext onDragEnd={handleDragEnd}>
                     <ComponentsColumn key="components_column" metadata={metadata} style={style}/>
                     <PageColumn key="page_column" metadata={metadata}/>
-                    <Comp ex='asd'/>
                 </DragDropContext>
             </EditorContainer>
             <button onClick={handleSaveSite}>Guardar plantilla</button>
